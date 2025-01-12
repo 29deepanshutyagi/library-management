@@ -11,11 +11,16 @@ const { jwtSecret, emailSecret, email } = config;
 
 // Nodemailer transporter setup
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
   auth: {
     user: email.user,
     pass: email.pass,
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 interface RegisterBody {
@@ -61,7 +66,7 @@ export const register: AsyncRequestHandler<{}, any, RegisterBody> = async (
     const emailToken = jwt.sign({ userId: user.id }, emailSecret, { expiresIn: "1h" });
 
     // Send verification email
-    const verificationLink = `http://localhost:3000/verify-email?token=${emailToken}`;
+    const verificationLink = `http://localhost:5000/auth/verify-email?token=${emailToken}`;
     await transporter.sendMail({
       from: `"Library Management" <${email.user}>`,
       to: userEmail,
